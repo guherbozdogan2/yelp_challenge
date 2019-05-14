@@ -1,0 +1,25 @@
+version: '2'
+services:
+  spark: 
+    image: bde2020/spark-master:2.4.0-hadoop2.7
+    hostname: "sandbox"
+    links:
+      - cassandra
+    volumes:
+      - ./target:/target
+      - ./data:/data
+    ports:
+      - "8088:8088"
+      - "8042:8042"
+      - "50070:50070"
+      - "50075:50075"
+      - "9000:9000"
+      - "4040:4040"
+  cassandra:
+    image: cassandra:3.11
+    hostname: "sandbox"
+    volumes:
+      - ./data:/data
+    ports:
+      - "9160:9160"
+      - "9042:9042"

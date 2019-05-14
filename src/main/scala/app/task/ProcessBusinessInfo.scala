@@ -29,11 +29,10 @@ object ProcessBusinessInfo {
     logger.setLevel(Level.WARN)
 
     //val logFile = "YOUR_SPARK_HOME/README.md" // Should be some file on your system
-    val spark = SparkSession.builder.appName("Simple Application").master("local[2]")
-      .config("spark.cassandra.connection.host", "127.0.0.1")
+    val spark = SparkSession.builder.appName("Simple Application")
       .getOrCreate()
 
-    val path = "/Users/user21/data/business.json"
+    val path = "data/business.json"
 
     import spark.implicits._
     implicit val c = CassandraConnector(spark.sparkContext.getConf.set("spark.cassandra.connection.host", "127.0.0.1"))

@@ -1,2 +1,4 @@
 # yelp_challenge
-yelp challenge SMACK tasks
+yelp challenge SMACK task
+
+
