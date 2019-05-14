@@ -20,18 +20,13 @@ import collection.JavaConversions._
 import org.apache.spark.SparkContext
 import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache.spark.SparkContext._, org.apache.spark.SparkConf
 
-//import scala.language.implicitConversion
-//ProcessBusinessInfo
 object ProcessReview {
-  // val logger: Logger = LogManager.getLogger(ProcessBusinessInfo.getClass)
 
   def main(args: Array[String]) {
     val logger = LogManager.getRootLogger
     logger.setLevel(Level.WARN)
 
-    //val logFile = "YOUR_SPARK_HOME/README.md" // Should be some file on your system
-    val spark = SparkSession.builder.appName("Simple Application").master("local[2]")
-      .config("spark.cassandra.connection.host", "127.0.0.1")
+    val spark = SparkSession.builder.appName("Simple Application")
       .getOrCreate()
 
     val path = "/Users/user21/data/review.json"
@@ -46,7 +41,6 @@ object ProcessReview {
       col("useful"), col("funny"), col("cool"))
       .withColumn("review_timestamp", when(col("review_timestamp_seconds").isNull, null).otherwise(CommonUDF.udf_seconds_to_miliseconds(col("review_timestamp_seconds"))))
       .as[ReviewEntity]
-
 
     input_dataset.rdd.saveToCassandra("test", "review",
       SomeColumns(

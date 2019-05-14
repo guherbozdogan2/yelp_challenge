@@ -39,5 +39,6 @@ lazy val app = (project in file("app")).
   )
 assemblyMergeStrategy in assembly := {
    case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+   case PathList("org.apache.spark",xs @ _*) => MergeStrategy.discard
    case x => MergeStrategy.first
 }

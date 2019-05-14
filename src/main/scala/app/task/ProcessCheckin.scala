@@ -22,20 +22,14 @@ import collection.JavaConversions._
 import org.apache.spark.SparkContext
 import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache.spark.SparkContext._, org.apache.spark.SparkConf
 
-
-//ProcessBusinessInfo
 object ProcessCheckin {
-  // val logger: Logger = LogManager.getLogger(ProcessBusinessInfo.getClass)
-
 
   def main(args: Array[String]) {
 
     val logger = LogManager.getRootLogger
     logger.setLevel(Level.WARN)
 
-    //val logFile = "YOUR_SPARK_HOME/README.md" // Should be some file on your system
-    val spark = SparkSession.builder.appName("Simple Application").master("local[2]")
-      .config("spark.cassandra.connection.host", "127.0.0.1")
+    val spark = SparkSession.builder.appName("Simple Application")
       .getOrCreate()
 
     val path = "/Users/user21/data/checkin.json"
@@ -55,7 +49,6 @@ object ProcessCheckin {
           col("checkin_ts"),
           "yyyy-MM-dd HH:mm:ss")).alias("checkin_ts")).filter("checkin_ts is not null")
       .as[CheckinEntity]
-
 
     input_dataset.rdd.saveToCassandra("test", "checkin",
       SomeColumns(

@@ -21,14 +21,12 @@ import org.apache.spark.SparkContext
 import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache.spark.SparkContext._, org.apache.spark.SparkConf
 
 object ProcessBusinessInfo {
-  // val logger: Logger = LogManager.getLogger(ProcessBusinessInfo.getClass)
-
+  
   def main(args: Array[String]) {
 
     val logger = LogManager.getRootLogger
     logger.setLevel(Level.WARN)
 
-    //val logFile = "YOUR_SPARK_HOME/README.md" // Should be some file on your system
     val spark = SparkSession.builder.appName("Simple Application")
       .getOrCreate()
 
@@ -40,8 +38,8 @@ object ProcessBusinessInfo {
     var input_dataset = spark.read.json(path).select("*")
       .withColumn("categories", split(col("categories"), ","))
       .withColumn("categories", when(col("categories").isNull, null).otherwise(CommonUDF.udf_trim_array_entities(col("categories"))))
-      .withColumn("attributes_map",  when(col("attributes").isNull, null).otherwise(CommonUDF.udfRowToMap(col("attributes"))))
-      .withColumn("hours_map",  when(col("hours").isNull, null).otherwise(CommonUDF.udfRowToMap(col("hours"))))
+      .withColumn("attributes_map", when(col("attributes").isNull, null).otherwise(CommonUDF.udfRowToMap(col("attributes"))))
+      .withColumn("hours_map", when(col("hours").isNull, null).otherwise(CommonUDF.udfRowToMap(col("hours"))))
       .select("*").as[BusinessInfoEntity]
 
     input_dataset.rdd.saveToCassandra("test", "business",
