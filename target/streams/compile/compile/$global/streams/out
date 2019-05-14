@@ -1,0 +1,4 @@
+[0m[[0m[31merror[0m] [0m[0m/Users/user21/yelp_challenge/src/main/scala/app/task/ProcessBusinessInfo.scala:44:127: ';' expected but ',' found.[0m
+[0m[[0m[31merror[0m] [0m[0m      .withColumn("attributes_map",  when(col("attributes").isNull, null).otherwise(CommonUDF.udfRowToMap(col("attributes")))),[0m
+[0m[[0m[31merror[0m] [0m[0m                                                                                                                              ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
