@@ -4,6 +4,9 @@ import org.apache.spark.sql.Row
 import scala.collection.immutable.Map
 import org.apache.spark.sql.functions.{ col, udf }
 object CommonUDF {
+  
+  def successReturn():Int = 1
+  def failureReturn():Int = 0
 
   val rowToMap: Row => Map[String, String] = (row: Row) => {
     if (row == null) {
@@ -15,15 +18,15 @@ object CommonUDF {
   }
   val udfRowToMap = udf(rowToMap)
 
-  val seconds_to_miliseconds: Long => Long = (column: Long) => {
+  val secondsToMiliseconds: Long => Long = (column: Long) => {
     column * 1000
   }
-  val udf_seconds_to_miliseconds = udf(seconds_to_miliseconds)
+  val udfSecondsToMiliseconds = udf(secondsToMiliseconds)
 
-  val trim_array_entities: Seq[String] => Seq[String] = (entities: Seq[String]) => {
+  val trimArrayEntities: Seq[String] => Seq[String] = (entities: Seq[String]) => {
 
     entities.map(s => s.replaceAll("^\\s+", "")).map(s => s.replaceAll("\\s+$", ""))
   }
-  val udf_trim_array_entities = udf(trim_array_entities)
+  val udfTrimArrayEntities = udf(trimArrayEntities)
 
 }

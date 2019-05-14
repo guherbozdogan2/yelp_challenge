@@ -19,29 +19,39 @@ import com.datastax.spark.connector.cql._
 import collection.JavaConversions._
 import org.apache.spark.SparkContext
 import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache.spark.SparkContext._, org.apache.spark.SparkConf
+import app.dao.common.CommonUDF
 
 object ProcessPhoto {
 
   def main(args: Array[String]) {
+    try {
+      val logger = LogManager.getRootLogger
+      logger.setLevel(Level.WARN)
 
-    val logger = LogManager.getRootLogger
-    logger.setLevel(Level.WARN)
+      val spark = SparkSession.builder.appName("Simple Application").master("local[*]")
+        .config("spark.cassandra.connection.host", "cassandra")
+        .getOrCreate()
 
-    val spark = SparkSession.builder.appName("Simple Application")
-      .getOrCreate()
+      val path = "../../data/photo.json"
 
-    val path = "/Users/user21/data/photo.json"
+      import spark.implicits._
 
-    import spark.implicits._
+      var input_dataset = spark.read.json(path).select(
+        "photo_id", "business_id", "caption", "label")
+        .as[PhotoEntity]
 
-    var input_dataset = spark.read.json(path).select(
-      "photo_id", "business_id", "caption", "label")
-      .as[PhotoEntity]
+      input_dataset.rdd.saveToCassandra("test", "photo",
+        SomeColumns(
+          "photo_id", "business_id", "caption", "label"))
+      
+      spark.stop()
+      CommonUDF.successReturn
+    } catch {
+      case e: Exception => {
+        e.printStackTrace
+        CommonUDF.failureReturn
+      }
 
-    input_dataset.rdd.saveToCassandra("test", "photo",
-      SomeColumns(
-        "photo_id", "business_id", "caption", "label"))
-
-    spark.stop()
+    }
   }
 }

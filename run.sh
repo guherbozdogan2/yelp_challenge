@@ -10,9 +10,9 @@ printf "Extracting Tar File\n"
 
 printf "Creating Virtual Machine \n"
 
-demo_machine_name="smackDemoGuhersDemo5"
+demo_machine_name="guhersDemoMachine4"
 
-docker-machine create -d virtualbox --virtualbox-memory "8000" --virtualbox-cpu-count "4" "$demo_machine_name"
+docker-machine create -d virtualbox --virtualbox-memory "7000" --virtualbox-cpu-count "4" "$demo_machine_name"
 
 eval "$(docker-machine env $demo_machine_name)"
 
@@ -20,8 +20,7 @@ docker-machine start "$demo_machine_name"
 
 docker-machine env "$demo_machine_name"
 
+printf "Running containers \n"
+docker-compose up 
 
-printf "Creating Target JAR File \n"
-sbt update
-sbt assembly
 

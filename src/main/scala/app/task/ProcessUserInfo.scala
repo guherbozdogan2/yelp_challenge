@@ -13,7 +13,7 @@ import org.apache.spark.sql.cassandra._
 import com.datastax.spark.connector._
 import org.apache.spark.sql.cassandra._
 import org.apache.spark.sql.functions.{ col, udf, split }
-
+import app.dao.common.CommonUDF
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.cql._
 import collection.JavaConversions._
@@ -23,46 +23,55 @@ import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache
 object ProcessUserInfo {
 
   def main(args: Array[String]) {
+    try {
+      val logger = LogManager.getRootLogger
+      logger.setLevel(Level.WARN)
 
-    val logger = LogManager.getRootLogger
-    logger.setLevel(Level.WARN)
+      val spark = SparkSession.builder.appName("Simple Application").master("local[*]")
+        .config("spark.cassandra.connection.host", "cassandra")
+        .getOrCreate()
 
-    val spark = SparkSession.builder.appName("Simple Application")
-      .getOrCreate()
+      val path = "../../data/user.json"
 
-    val path = "/Users/user21/data/user.json"
+      import spark.implicits._
 
-    import spark.implicits._
-
-    var input_dataset = spark.read.json(path).select("*").withColumn(
-      "friends_list",
-      split(col("friends"), ",")).as[UserEntity]
-
-    input_dataset.rdd.saveToCassandra("test", "user",
-      SomeColumns(
-        "average_stars",
-        "compliment_cool",
-        "compliment_cute",
-        "compliment_funny",
-        "compliment_hot",
-        "compliment_list",
-        "compliment_more",
-        "compliment_note",
-        "compliment_photos",
-        "compliment_plain",
-        "compliment_profile",
-        "compliment_writer",
-        "cool",
-        "elite",
-        "fans",
+      var input_dataset = spark.read.json(path).select("*").withColumn(
         "friends_list",
-        "funny",
-        "name",
-        "review_count",
-        "useful",
-        "user_id",
-        "yelping_since"))
+        split(col("friends"), ",")).as[UserEntity]
 
-    spark.stop()
+      input_dataset.rdd.saveToCassandra("test", "user",
+        SomeColumns(
+          "average_stars",
+          "compliment_cool",
+          "compliment_cute",
+          "compliment_funny",
+          "compliment_hot",
+          "compliment_list",
+          "compliment_more",
+          "compliment_note",
+          "compliment_photos",
+          "compliment_plain",
+          "compliment_profile",
+          "compliment_writer",
+          "cool",
+          "elite",
+          "fans",
+          "friends_list",
+          "funny",
+          "name",
+          "review_count",
+          "useful",
+          "user_id",
+          "yelping_since"))
+
+      spark.stop()
+      CommonUDF.successReturn
+    } catch {
+      case e: Exception => {
+        e.printStackTrace
+        CommonUDF.failureReturn
+      }
+
+    }
   }
 }

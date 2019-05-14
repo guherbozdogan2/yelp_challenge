@@ -1,4 +1,4 @@
-name := "Yelp Conversion"
+name := "Yelp Conversion task"
 
 version := "1.0"
 
@@ -6,7 +6,8 @@ scalaVersion := "2.11.8"
 
 val sparkVersion = "2.3.0"
 
-
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
 resolvers ++= Seq(
   "apache-snapshots" at "http://repository.apache.org/snapshots/"
 )
@@ -36,9 +37,18 @@ lazy val app = (project in file("app")).
   settings(
     mainClass in assembly := Some("com.example.Main"),
     // more settings here ...
-  )
-assemblyMergeStrategy in assembly := {
-   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-   case PathList("org.apache.spark",xs @ _*) => MergeStrategy.discard
-   case x => MergeStrategy.first
-}
+ )
+
+
+
+enablePlugins(JavaAppPackaging, AshScriptPlugin)
+daemonUserUid in Docker := None
+daemonUser in Docker := "daemon"
+dockerBaseImage := "openjdk:8-jre-alpine"
+dockerUpdateLatest := true
+maintainer in Docker := "Guher Bozdogan <guher.bozdogan.wrk2@gmail.com>"
+packageSummary in Docker := "yelp challenge sample db migration"
+packageDescription := "Docker micro Service"
+
+
+packageName in Docker := "repo"

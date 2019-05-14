@@ -25,36 +25,46 @@ import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache
 object ProcessCheckin {
 
   def main(args: Array[String]) {
+    try {
 
-    val logger = LogManager.getRootLogger
-    logger.setLevel(Level.WARN)
+      val logger = LogManager.getRootLogger
+      logger.setLevel(Level.WARN)
 
-    val spark = SparkSession.builder.appName("Simple Application")
-      .getOrCreate()
+      val spark = SparkSession.builder.appName("Simple Application").master("local[*]")
+        .config("spark.cassandra.connection.host", "cassandra")
+        .getOrCreate()
 
-    val path = "/Users/user21/data/checkin.json"
+      val path = "../../data/checkin.json"
 
-    import spark.implicits._
+      import spark.implicits._
 
-    var input_dataset = spark.read.json(path).select("*").withColumn(
-      "date_list",
-      split(col("date"), ","))
+      var input_dataset = spark.read.json(path).select("*").withColumn(
+        "date_list",
+        split(col("date"), ","))
 
-      .withColumn("checkin_ts", explode(col("date_list")))
-      .withColumn("checkin_ts", ltrim(col("checkin_ts")))
-      .withColumn("checkin_ts", rtrim(col("checkin_ts")))
-      .filter("checkin_ts is not null and length(checkin_ts)>0")
-      .select(col("business_id"), CommonUDF.udf_seconds_to_miliseconds(
-        unix_timestamp(
-          col("checkin_ts"),
-          "yyyy-MM-dd HH:mm:ss")).alias("checkin_ts")).filter("checkin_ts is not null")
-      .as[CheckinEntity]
+        .withColumn("checkin_ts", explode(col("date_list")))
+        .withColumn("checkin_ts", ltrim(col("checkin_ts")))
+        .withColumn("checkin_ts", rtrim(col("checkin_ts")))
+        .filter("checkin_ts is not null and length(checkin_ts)>0")
+        .select(col("business_id"), CommonUDF.udfSecondsToMiliseconds(
+          unix_timestamp(
+            col("checkin_ts"),
+            "yyyy-MM-dd HH:mm:ss")).alias("checkin_ts")).filter("checkin_ts is not null")
+        .as[CheckinEntity]
 
-    input_dataset.rdd.saveToCassandra("test", "checkin",
-      SomeColumns(
-        "business_id",
-        "checkin_ts"))
+      input_dataset.rdd.saveToCassandra("test", "checkin",
+        SomeColumns(
+          "business_id",
+          "checkin_ts"))
 
-    spark.stop()
+      spark.stop()
+      CommonUDF.successReturn
+    } catch {
+      case e: Exception => {
+        e.printStackTrace
+        CommonUDF.failureReturn
+      }
+
+    }
   }
 }

@@ -21,32 +21,43 @@ import org.apache.spark.SparkContext
 import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache.spark.SparkContext._, org.apache.spark.SparkConf
 
 object ProcessBusinessInfo {
-  
+
   def main(args: Array[String]) {
 
-    val logger = LogManager.getRootLogger
-    logger.setLevel(Level.WARN)
+    try {
 
-    val spark = SparkSession.builder.appName("Simple Application")
-      .getOrCreate()
+      val logger = LogManager.getRootLogger
+      logger.setLevel(Level.WARN)
 
-    val path = "data/business.json"
+      val spark = SparkSession.builder.appName("Simple Application").master("local[*]")
+        .config("spark.cassandra.connection.host", "cassandra")
+        .getOrCreate()
 
-    import spark.implicits._
-    implicit val c = CassandraConnector(spark.sparkContext.getConf.set("spark.cassandra.connection.host", "127.0.0.1"))
+      val path = "../../data/business.json"
 
-    var input_dataset = spark.read.json(path).select("*")
-      .withColumn("categories", split(col("categories"), ","))
-      .withColumn("categories", when(col("categories").isNull, null).otherwise(CommonUDF.udf_trim_array_entities(col("categories"))))
-      .withColumn("attributes_map", when(col("attributes").isNull, null).otherwise(CommonUDF.udfRowToMap(col("attributes"))))
-      .withColumn("hours_map", when(col("hours").isNull, null).otherwise(CommonUDF.udfRowToMap(col("hours"))))
-      .select("*").as[BusinessInfoEntity]
+      import spark.implicits._
+      implicit val c = CassandraConnector(spark.sparkContext.getConf.set("spark.cassandra.connection.host", "127.0.0.1"))
 
-    input_dataset.rdd.saveToCassandra("test", "business",
-      SomeColumns(
-        "address", "business_id", "hours_map", "attributes_map", "categories", "city", "is_open", "latitude", "longitude", "name",
-        "postal_code", "review_count", "stars", "state"))
+      var input_dataset = spark.read.json(path).select("*")
+        .withColumn("categories", split(col("categories"), ","))
+        .withColumn("categories", when(col("categories").isNull, null).otherwise(CommonUDF.udfTrimArrayEntities(col("categories"))))
+        .withColumn("attributes_map", when(col("attributes").isNull, null).otherwise(CommonUDF.udfRowToMap(col("attributes"))))
+        .withColumn("hours_map", when(col("hours").isNull, null).otherwise(CommonUDF.udfRowToMap(col("hours"))))
+        .select("*").as[BusinessInfoEntity]
 
-    spark.stop()
+      input_dataset.rdd.saveToCassandra("test", "business",
+        SomeColumns(
+          "address", "business_id", "hours_map", "attributes_map", "categories", "city", "is_open", "latitude", "longitude", "name",
+          "postal_code", "review_count", "stars", "state"))
+
+      spark.stop()
+      CommonUDF.successReturn
+    } catch {
+      case e: Exception => {
+        e.printStackTrace
+        CommonUDF.failureReturn
+      }
+
+    }
   }
 }

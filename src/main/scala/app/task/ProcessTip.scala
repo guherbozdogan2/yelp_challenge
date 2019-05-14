@@ -23,32 +23,41 @@ import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache
 object ProcessTip {
 
   def main(args: Array[String]) {
+    try {
+      val logger = LogManager.getRootLogger
+      logger.setLevel(Level.WARN)
 
-    val logger = LogManager.getRootLogger
-    logger.setLevel(Level.WARN)
+      val spark = SparkSession.builder.appName("Simple Application").master("local[*]")
+        .config("spark.cassandra.connection.host", "cassandra")
+        .getOrCreate()
 
-    val spark = SparkSession.builder.appName("Simple Application")
-      .getOrCreate()
+      val path = "../../data/tip.json"
 
-    val path = "/Users/user21/data/tip.json"
+      import spark.implicits._
 
-    import spark.implicits._
+      var input_dataset = spark.read.json(path).select(
+        col("user_id"),
+        col("compliment_count"), unix_timestamp(
+          rtrim(ltrim(col("date"))),
+          "yyyy-MM-dd HH:mm:ss").alias("tip_timestamp_seconds"),
+        col("business_id"), col("text").alias("tip_text")).withColumn("tip_timestamp", when(col("tip_timestamp_seconds").isNull, null).otherwise(CommonUDF.udfSecondsToMiliseconds(col("tip_timestamp_seconds"))))
+        .as[TipEntity]
+      input_dataset.rdd.saveToCassandra("test", "tip",
+        SomeColumns(
+          "tip_text",
+          "tip_timestamp",
+          "compliment_count",
+          "business_id",
+          "user_id"))
 
-    var input_dataset = spark.read.json(path).select(
-      col("user_id"),
-      col("compliment_count"), unix_timestamp(
-        rtrim(ltrim(col("date"))),
-        "yyyy-MM-dd HH:mm:ss").alias("tip_timestamp_seconds"),
-      col("business_id"), col("text").alias("tip_text")).withColumn("tip_timestamp", when(col("tip_timestamp_seconds").isNull, null).otherwise(CommonUDF.udf_seconds_to_miliseconds(col("tip_timestamp_seconds"))))
-      .as[TipEntity]
-    input_dataset.rdd.saveToCassandra("test", "tip",
-      SomeColumns(
-        "tip_text",
-        "tip_timestamp",
-        "compliment_count",
-        "business_id",
-        "user_id"))
+      spark.stop()
+      CommonUDF.successReturn
+    } catch {
+      case e: Exception => {
+        e.printStackTrace
+        CommonUDF.failureReturn
+      }
 
-    spark.stop()
+    }
   }
 }

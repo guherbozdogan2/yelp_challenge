@@ -23,37 +23,47 @@ import com.datastax.spark.connector._, org.apache.spark.SparkContext, org.apache
 object ProcessReview {
 
   def main(args: Array[String]) {
-    val logger = LogManager.getRootLogger
-    logger.setLevel(Level.WARN)
+    try {
+      val logger = LogManager.getRootLogger
+      logger.setLevel(Level.WARN)
 
-    val spark = SparkSession.builder.appName("Simple Application")
-      .getOrCreate()
+      val spark = SparkSession.builder.appName("Simple Application").master("local[*]")
+        .config("spark.cassandra.connection.host", "cassandra")
+        .getOrCreate()
 
-    val path = "/Users/user21/data/review.json"
+      val path = "../../data/review.json"
 
-    import spark.implicits._
+      import spark.implicits._
 
-    var input_dataset = spark.read.json(path).select(
-      col("review_id"), col("user_id"), col("business_id"), col("stars").cast("float"),
-      unix_timestamp(
-        rtrim(ltrim(col("date"))),
-        "yyyy-MM-dd HH:mm:ss").alias("review_timestamp_seconds"), col("text").alias("review_text"),
-      col("useful"), col("funny"), col("cool"))
-      .withColumn("review_timestamp", when(col("review_timestamp_seconds").isNull, null).otherwise(CommonUDF.udf_seconds_to_miliseconds(col("review_timestamp_seconds"))))
-      .as[ReviewEntity]
+      var input_dataset = spark.read.json(path).select(
+        col("review_id"), col("user_id"), col("business_id"), col("stars").cast("float"),
+        unix_timestamp(
+          rtrim(ltrim(col("date"))),
+          "yyyy-MM-dd HH:mm:ss").alias("review_timestamp_seconds"), col("text").alias("review_text"),
+        col("useful"), col("funny"), col("cool"))
+        .withColumn("review_timestamp", when(col("review_timestamp_seconds").isNull, null).otherwise(CommonUDF.udfSecondsToMiliseconds(col("review_timestamp_seconds"))))
+        .as[ReviewEntity]
 
-    input_dataset.rdd.saveToCassandra("test", "review",
-      SomeColumns(
-        "review_id",
-        "user_id",
-        "business_id",
-        "stars",
-        "review_timestamp",
-        "review_text",
-        "useful",
-        "funny",
-        "cool"))
+      input_dataset.rdd.saveToCassandra("test", "review",
+        SomeColumns(
+          "review_id",
+          "user_id",
+          "business_id",
+          "stars",
+          "review_timestamp",
+          "review_text",
+          "useful",
+          "funny",
+          "cool"))
 
-    spark.stop()
+      spark.stop()
+      CommonUDF.successReturn
+    } catch {
+      case e: Exception => {
+        e.printStackTrace
+        CommonUDF.failureReturn
+      }
+
+    }
   }
 }
