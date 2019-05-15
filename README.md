@@ -20,4 +20,11 @@ To test the db, the cqlsh client of cassandra container should be executed as:
 	>cqslh
 	>describe test.tables
 	>select * from test.photo limit 10
+	
 ```
+
+## The image used in solution
+The generated image used to create the task named service in compose.yaml file is taken from following repository:
+	docker pull guherbozdogan2/repo
+	
+The generation has been established in scala project via sbt docker plugin(via sbt sbt docker:publishLocal command). The command generates Docker file for above repo and it's lib/bin folders (with populated applications).
