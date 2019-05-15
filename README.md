@@ -23,8 +23,12 @@ To test the db, the cqlsh client of cassandra container should be executed as:
 	
 ```
 
-## The image used in solution
+## The container image built for solution
 The generated image used to create the task named service in compose.yaml file is taken from following repository:
 	docker pull guherbozdogan2/repo
 	
-The generation has been established in scala project via sbt docker plugin(via sbt sbt docker:publishLocal command). The command generates Docker file for above repo and it's lib/bin folders (with populated applications).
+The generation has been established via sbt docker plugin(via sbt sbt docker:publishLocal command inside this project folder). The command generates Docker file and it's necessary lib/bin folders (with populated applications).
+
+The spark application is ran lke a standalone spark application. The best condition would be creating a new Docker container for Spark Executors (Docker using Mesos' project's spark executors) and using spark-submit. This solution currently uses a stand alone spark application instead of utilizing spark-submit( spark client/cluster mode). 
+
+
