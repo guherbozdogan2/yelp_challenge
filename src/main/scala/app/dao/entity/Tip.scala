@@ -11,6 +11,7 @@ import org.apache.spark.sql.types.StringType
 import com.datastax.driver.core.LocalDate
 
 case class TipEntity(
+      tip_id: String,
      tip_text: String,
 	   tip_timestamp: Option[Long], 
 	   compliment_count: Long, 

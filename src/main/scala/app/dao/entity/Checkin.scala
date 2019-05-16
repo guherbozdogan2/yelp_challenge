@@ -12,6 +12,7 @@ import org.apache.spark.sql.types.StringType
 
 
 case class CheckinEntity(
+    checkin_id:String,
      business_id:String, 
      checkin_ts:Long)
     

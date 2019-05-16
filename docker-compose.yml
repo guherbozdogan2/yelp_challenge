@@ -9,13 +9,13 @@ services:
     ports:
       - "9160:9160"
       - "9042:9042"
-  task: 
+  task:
     image: guherbozdogan2/repo:latest
-    depends_on: 
+    depends_on:
       - "cassandra"
     hostname: "sandbox"
     environment:
-      - JAVA_OPTS=-Xms512m -Xmx2g
+      - JAVA_OPTS=-Xms512m -Xmx5g
     links:
       - cassandra
     volumes:
