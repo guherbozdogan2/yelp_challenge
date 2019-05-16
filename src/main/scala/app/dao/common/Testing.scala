@@ -15,7 +15,6 @@ import com.datastax.spark.connector._
 import org.apache.spark.sql.cassandra._
 import org.apache.spark.sql.functions.{ col, udf, split, when,lit,count,sum,monotonicallyIncreasingId }
 import org.apache.spark.sql._
-import app.dao.common.CommonUDF
 import com.datastax.spark.connector._
 import com.datastax.spark.connector.cql._
 import collection.JavaConversions._
