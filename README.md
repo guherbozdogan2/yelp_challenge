@@ -55,9 +55,13 @@ In integration tests, the following 2 cases are tested for each table: (This tas
 
 
 Sample outputs in console after executing ./run.sh: 
+
+```
 ******************Testing whether cardinality of RDD is same as CQL Table's cardinality in table:business
 ******************Success in:Testing whether cardinality of RDD is same as CQL Table's cardinality in table:business
+```
 
+```
 ******************Testing randomly sampled ${input.length} records existence in table:business
 ******************Success in: Testing randomly sampled ${input.length} records existence in table:business
-
+```
