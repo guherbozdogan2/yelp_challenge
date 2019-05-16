@@ -7,7 +7,7 @@ Docker is necessary for building.
 
 ## Setting Up Environment and running
 ### Creating docker machines and running containers
-To establish the execution of spark tasks, the following script should be executed with providing the path of the data file:
+To establish the execution of spark tasks and docker container run, only the following script should be executed with providing the path of the data file:
 ```
 	  chmod +x *.sh
 	  ./run.sh TAR_GZ_FILE_LOCATION
