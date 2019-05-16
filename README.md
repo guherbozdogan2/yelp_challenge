@@ -43,10 +43,12 @@ The generation has been established via this scala-sbt project via sbt docker pl
 ## Current Limitations
 - The spark application is ran lke a standalone spark application. The best ran condition would be creating a new Docker image based on Spark images for Spark Executors (Docker using Mesos' project's spark executors) and using spark-submit instead of standalone application. This solution currently uses a stand alone spark application instead of utilizing spark-submit( spark client/cluster mode).
 - Unit tests are missing
-- Integration test cases have low coverage
+- Integration test cases have low coverage and should be automated wth a test framework
+- Jenkins like CI tool integration for builds + log server integration for spark logs/docker compose logs
 
 
 ## Queries in integration tests
-In integration tests, the following 2 cases are tested for each table:
+In integration tests, the following 2 cases are tested for each table: (This task executes right after the migration completes and the tests results are written with Success/Error logs output in console currently(With having prefix of "*******" )
+
 - The equivalence of cardinality of RDD data and Cassandra table based on partition key  (grouped by partition key)
 - Whether sampled 1000 different records (With different partititon keys from RDD) also exist in cassandra table
