@@ -48,7 +48,7 @@ The generation has been established via this scala-sbt project via sbt docker pl
 
 
 ## Queries in integration tests
-In integration tests, the following 2 cases are tested for each table: (This task executes right after the migration completes and the tests results are written with Success/Error logs output in console currently(With having prefix of "*******" )
+In integration tests, the following 2 cases are tested for each table: (This task executes right after the migration completes and the tests results are written with Success/Error logs output in console currently(With having prefix of "******************" )
 
 - The equivalence of cardinality of RDD data and Cassandra table based on partition key  (grouped by partition key)
 - Whether sampled 1000 different records (With different partititon keys from RDD) also exist in cassandra table
