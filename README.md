@@ -62,6 +62,6 @@ Sample outputs in console after executing ./run.sh:
 ```
 
 ```
-******************Testing randomly sampled ${input.length} records existence in table:business
-******************Success in: Testing randomly sampled ${input.length} records existence in table:business
+******************Testing randomly sampled 1000 records existence in table:business
+******************Success in: Testing randomly sampled 1000 records existence in table:business
 ```
