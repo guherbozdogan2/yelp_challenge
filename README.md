@@ -23,16 +23,18 @@ To test the db, the cqlsh client of cassandra container should be executed as:
 
 ```
 
-## The container image used in solution
+## The container image's build steps (not necessary to do, since its already ready in docker hub)
 The generated image used to create the "task" named container process (task service docker-compose,yml) is taken from following repository:
 	docker pull guherbozdogan2/repo:latest
 
-The generation has been established via this scala-sbt project via sbt docker plugin(via sbt sbt docker:publishLocal command inside this project folder). The command generates Docker file and it's necessary lib/bin folders (with populated applications). Accordingly the above docker hub repo has been generated from the repo with the following steps: (The below steps are not necessary to do for to run project. Since the docker image is alreadily existing in docker hub repo of: guherbozdogan2/repo:latest )
+The generation has been established via this scala-sbt project via sbt docker plugin(via sbt sbt docker:publishLocal command inside this project folder). The command generates Docker file and it's necessary lib/bin folders (with populated applications). Accordingly the above docker hub repo has been generated from the repo with the following steps: (The below steps are not necessary to do for to run project.  Only ./run.sh command execution is enough to run project as since the docker image is alreadily existing in docker hub repo: guherbozdogan2/repo:latest )
+
 ```
     >sbt update clean compile package
     >sbt docker:publishLocal
     >cd docker/target/stage
 ```
+
     Change the line of: 'ENTRYPOINT ["/opt/docker/bin/yelp-conversion-task"]' to 'ENTRYPOINT /opt/docker/bin/main-task && /opt/docker/bin/main-test-task' and build local image with:
 ```
     >docker build -t repo .
